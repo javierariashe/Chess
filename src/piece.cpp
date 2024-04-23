@@ -7,6 +7,7 @@ Piece::Piece(int x, int y, bool team) {
     this->position_x = x;
     this->position_y = y;
     this->team = team;
+    this->first = true;
 }
 
 void Piece::load_texture () {
@@ -24,22 +25,18 @@ Pawn::Pawn(int x, int y, bool team) : Piece(x, y, team) {
     first = true;
 }
 
-bool Pawn::valid_cell (int x, int y, bool opponent) {
+bool Pawn::valid_cell (int x, int y, bool is_opponent) {
     int direction = (team) ? 1 : -1;
-    bool valid = false;
 
-    if (opponent) {
+    if (is_opponent) {
         if (x != position_x+1 && x != position_x-1) return false;
-        if (y == position_y+(direction)) valid = true;
+        if (y == position_y+(direction))  return true;
     }
     else if(x == position_x) {
-        if(y == position_y+(2*direction) && first) valid = true;
-        else if(y == position_y+(direction)) valid = true;
+        if(y == position_y+(2*direction) && first) return true;
+        else if(y == position_y+(direction)) return true;
     }
-
-    if(first && valid) first = false;
-
-    return valid;
+    return false;
 }
 
 

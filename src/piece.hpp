@@ -5,21 +5,20 @@ class Board;
 
 class Piece{
     public:
-    int position_x, position_y;
-    sf::Texture texture;
-    std::string texture_file;
-    sf::Sprite sprite;
-    bool team;
+        int position_x, position_y;
+        sf::Texture texture;
+        std::string texture_file;
+        sf::Sprite sprite;
+        bool team;
+        bool first;
 
-    Piece(int, int, bool);
-    void load_texture();
-    virtual bool valid_cell(int, int, bool) {return false;};
+        Piece(int, int, bool);
+        void load_texture();
+        virtual bool valid_cell(int, int, bool) {return false;};
 };
 
 class Pawn: public Piece {
     public:
-    bool first;
-
     Pawn(int, int, bool);
     bool valid_cell(int, int, bool) override;
 };

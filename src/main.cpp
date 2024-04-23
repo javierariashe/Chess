@@ -30,10 +30,13 @@ int main()
                  y >= board.offsety && y <= res_y-board.offsety) {
                     if(selected_piece == nullptr) {
                             selected_piece = board.check_click(x, y, turn);                        
-                    } else {
+                            board.possible_cells(selected_piece);
+                    } 
+                    else {
                         int state = board.move_piece(x, y, selected_piece);
                         if(state >= 1) {
                             selected_piece = nullptr;
+                            board.clear_board();
                             if(state == 1) turn = !turn;
                         }
                     }

@@ -29,6 +29,17 @@ void Board::draw_board(sf::RenderWindow* window) {
             window->draw(cell->rectangle);
             if(cell->piece != nullptr) 
                 window->draw(cell->piece->sprite);
+            if(cell->marker.getFillColor() != cell->rectangle.getFillColor())
+                window->draw(cell->marker);
+        }
+    }
+}
+
+void Board::clear_board() {
+    for(int i = 0; i < 8; i++) {
+        for(int j = 0; j < 8; j++) {
+            Cell* cell = cells[i][j];
+            cell->marker.setFillColor(cell->rectangle.getFillColor());
         }
     }
 }
@@ -49,18 +60,13 @@ Piece* Board::check_click(int x, int y, bool turn) {
     return nullptr;
 }
 
-int Board::move_piece(int x, int y, Piece* piece) {
-    int cell_x = (x - offsetx) / length;
-    int cell_y = (y - offsety) / length;
+int Board::check_movement(int cell_x, int cell_y, Piece* piece) {
 
     Cell* current_cell = cells[piece->position_x][piece->position_y];
 
     //Check if it is the same selected cell
-    if(cell_x == piece->position_x && cell_y == piece->position_y) { 
-        current_cell->rectangle.setOutlineColor(current_cell->rectangle.getFillColor());
-        return 2;
-    }
-
+    if(cell_x == piece->position_x && cell_y == piece->position_y) return 2;
+    
     Piece *opponent = nullptr;
 
     Piece* other_piece = cells[cell_x][cell_y]->piece;
@@ -69,23 +75,48 @@ int Board::move_piece(int x, int y, Piece* piece) {
         opponent = other_piece;
     }
 
-    bool is_opponent = (opponent != nullptr);
-    
     //Check if the piece can move to the selected cell
+    bool is_opponent = (opponent != nullptr);
     if(!piece->valid_cell(cell_x, cell_y, is_opponent)) return 0;
     if(!this->check_path(cell_x, cell_y, piece)) return 0;
 
-    cells[piece->position_x][piece->position_y]->piece = nullptr;
+    return 1;
+}
+
+int Board::move_piece(int x, int y, Piece* piece) {
+    int cell_x = (x - offsetx) / length;
+    int cell_y = (y - offsety) / length;
+    int state = check_movement(cell_x, cell_y, piece);
+    if(state == 0) return 0;
+
+    Cell* current_cell = cells[piece->position_x][piece->position_y];
     current_cell->rectangle.setOutlineColor(current_cell->rectangle.getFillColor());
 
-    piece->position_x = cell_x;
-    piece->position_y = cell_y;
+    if(state == 1) {
+        cells[piece->position_x][piece->position_y]->piece = nullptr;
 
-    this->set_piece(piece);
-    //delete opponent piece if there is one
-    if (opponent != nullptr) delete opponent;
+        piece->position_x = cell_x;
+        piece->position_y = cell_y;
 
-    return 1;
+        //delete opponent piece if there is one
+        if (current_cell->piece != nullptr) delete current_cell->piece;
+
+        if(piece->first) piece->first = false;
+        this->set_piece(piece);
+    }
+    return state;
+}
+
+void Board::possible_cells(Piece* piece) {
+    if(piece == nullptr) return;
+    sf::Color marker_color (0x5E, 0x81, 0xAC);
+    for(int i = 0; i < 8; i++) {
+        for(int j = 0; j < 8; j++) {
+            Cell* current_cell = cells[i][j];
+            if(check_movement(i, j, piece) == 1)
+                current_cell->marker.setFillColor(marker_color);
+        }
+    }
 }
 
 bool Board::check_path(int cell_x, int cell_y, Piece* piece) {
@@ -132,6 +163,16 @@ void Board::set_piece(Piece* piece) {
     float x = offsetx + (piece->position_x*length);
     float y = offsety + (piece->position_y*length);
 
+    if ((piece->position_y == 0 && !piece->team) || (piece->position_y == 7 && piece->team)) {
+        Pawn *p;
+        p = dynamic_cast<Pawn *>(piece);
+        if(p != nullptr){
+            Piece *t = piece;
+            piece = new Queen(t->position_x, t->position_y, t->team);
+            delete t;
+        }
+    }
+    
     cells[piece->position_x][piece->position_y]->piece = piece;
     piece->sprite.setPosition(sf::Vector2f(x,y));
 }
