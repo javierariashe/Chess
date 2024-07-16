@@ -8,7 +8,9 @@ Board::Board() {
     this->length = 80.f;
     this->offsetx = 80.f;
     this->offsety = 80.f;
+
     vector<vector<Cell*>> cells(8);
+
     for(int i = 0; i < 8; i++) {
         vector<Cell*> row(8);
         for(int j = 0; j < 8; j++) {
@@ -17,8 +19,8 @@ Board::Board() {
         }
         cells[i] = row;
     }
-    this->cells = cells;
 
+    this->cells = cells;
     start_pieces();
 }
 
@@ -52,6 +54,7 @@ Piece* Board::check_click(int x, int y, bool turn) {
     if(cell->piece == nullptr || cell->piece->team != turn) return nullptr;
 
     sf::Color outline (0x5E, 0x81, 0xAC);
+
     if (cell->piece != nullptr) {
         cell->rectangle.setOutlineColor(outline);
         return cell->piece;
