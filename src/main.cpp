@@ -21,7 +21,7 @@ int main()
         {
             if (event.type == sf::Event::Closed)
                 window.close();
-            
+
             if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
                 int x = event.mouseButton.x;
                 int y = event.mouseButton.y;
@@ -29,15 +29,15 @@ int main()
                 if(x >= board.offsetx && x <= res_x-board.offsetx &&
                  y >= board.offsety && y <= res_y-board.offsety) {
                     if(selected_piece == nullptr) {
-                            selected_piece = board.check_click(x, y, turn);                        
+                            selected_piece = board.check_click(x, y, turn);
                             board.possible_cells(selected_piece);
-                    } 
+                    }
                     else {
                         int state = board.move_piece(x, y, selected_piece);
                         if(state >= 1) {
                             selected_piece = nullptr;
                             board.clear_board();
-                            if(state == 1) turn = !turn;
+                            if(state == 1 || state == 3) turn = !turn;
                         }
                     }
                 }
